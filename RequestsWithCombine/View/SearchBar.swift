@@ -9,36 +9,41 @@ import Foundation
 import SwiftUI
 
 struct SearchBar: UIViewRepresentable {
-
-    private var delegate: SearchBarControl!
-
-    var title: String?
-
-    init(_ title: String?, text: Binding<String>) {
-        self.title = title
-        self.delegate = SearchBarControl(text)
-    }
-
-    func makeUIView(context: Context) -> UISearchBar  {
-        let view = UISearchBar(frame: .zero)
-        view.placeholder = self.title
-        view.delegate = self.delegate
-        return view
-    }
-
-    func updateUIView(_ uiView: UISearchBar, context: Context) {
-    }
-
-    private class SearchBarControl: NSObject, UISearchBarDelegate {
-
-        var text: Binding<String>
-
-        init(_ text: Binding<String>) {
-            self.text = text
+    @Binding var text: String
+    var placeholder: String
+    
+    class Coordinator: NSObject, UISearchBarDelegate {
+        @Binding var text: String
+        
+        init(text: Binding<String>) {
+            _text = text
         }
-
+        
         func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            self.text.wrappedValue = searchBar.text ?? ""
+            text = searchText
         }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(text: $text)
+    }
+    
+    func makeUIView(context:  UIViewRepresentableContext<SearchBar>) -> UISearchBar {
+        let searchBar = UISearchBar(frame: .zero)
+        searchBar.delegate = context.coordinator
+        searchBar.placeholder = placeholder
+        searchBar.searchBarStyle = .minimal
+        searchBar.autocapitalizationType = .none
+        return searchBar
+    }
+    
+    func updateUIView(_ uiView: UISearchBar, context: UIViewRepresentableContext<SearchBar>) {
+        uiView.text = text
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }

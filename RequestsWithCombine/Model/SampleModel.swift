@@ -27,7 +27,9 @@ class SampleModel: ObservableObject {
     }
     
     var searchText: String = "" {
-        didSet { didChange.send(()) }
+        didSet {
+            didChange.send(())
+        }
     }
     
     func cancel() {
